@@ -216,10 +216,14 @@ class Cube:
 			self.perform_move(last_move)
 			self.history = self.history[:-1]
 
-	def show(self):
-		CubeDrawer.show(self,str(" ".join(map(str, self.history))))
+	def get_history_str(self):
+		return str(" ".join(map(str, self.history)))
 
-if __name__ == "__main__":
-	cube = Cube()
-	cube.perform_alg("F R U R' U' F'")
-	cube.show()
+	def simulate(self):
+		CubeDrawer.show(self,interactive=True)
+
+	def show_image(self):
+		CubeDrawer.show(self)
+
+cube = Cube()
+cube.show_image()

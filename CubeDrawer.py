@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import cv2
 from CubeEnums import *
 
@@ -7,8 +8,7 @@ SIDE_SIZE = 200
 STICKER_SIZE = int(SIDE_SIZE/3)
 IMG_SIZE = (SIDE_SIZE*3+2,SIDE_SIZE*4+2)
 
-# Enum to RGB
-COLOR_MAP = {
+COLOR_MAP_BGR = {
 	Color.WHITE: (1,1,1),
 	Color.YELLOW: (0,1,1),
 	Color.BLUE:  (1,0,0),
@@ -17,29 +17,63 @@ COLOR_MAP = {
 	Color.ORANGE: (0,0.64,1)
 }
 
+COLOR_MAP_RGB = {
+	Color.WHITE: (1,1,1),
+	Color.YELLOW: (1,1,0),
+	Color.BLUE:  (0,0,1),
+	Color.GREEN: (0,1,0),
+	Color.RED: (1,0,0),
+	Color.ORANGE: (1,0.64,0)
+}
 
 '''
 Draws a cube on screen
 
 :param cube: Instance of Cube class
 '''
-def show(cube,history=""):
+def show(cube,interactive=False):
+	global COLOR_MAP
+	if(interactive):
+		COLOR_MAP = COLOR_MAP_BGR
+		_run_cv2(cube)
+	else:
+		COLOR_MAP = COLOR_MAP_RGB
+		_run_pyplot(cube)
+	
+	
+
+def _update_image(cube):
+	image = np.ones((IMG_SIZE[0],IMG_SIZE[1],3))*(0.5,0.5,0.5)
+	faces = [Face.FRONT,Face.BACK,Face.UP,Face.DOWN,Face.RIGHT,Face.LEFT]
+	for face in faces:
+		_color_face(image,face,cube.sides[face])
+	return image
+
+
+def _run_cv2(cube):
 	key = 0
-	while controls(key,cube):
-		# Create image
-		image = np.ones((IMG_SIZE[0],IMG_SIZE[1],3))*(0.5,0.5,0.5)
-		faces = [Face.FRONT,Face.BACK,Face.UP,Face.DOWN,Face.RIGHT,Face.LEFT]
-		for face in faces:
-			_color_face(image,face,cube.sides[face])
-
-		screen = cv2.imshow("Rubik's cube ( {} )".format(history),image)
-
+	while _controls(key,cube):
+		image = _update_image(cube)
+		screen = cv2.imshow("Rubik's cube",image)
 		key = cv2.waitKey(25) & 0xFF
+
+# TODO: Draw move history on top of the image
+def _run_pyplot(cube):
+	image = np.array(_update_image(cube))
+	fig = plt.imshow(image)
+
+	# Turn off axis
+	plt.axis('off')
+	fig.axes.get_xaxis().set_visible(False)
+	fig.axes.get_yaxis().set_visible(False)
+
+	plt.show()
+
 		
 		
 
-def controls(key,cube):
-	if(key == ord('q')):
+def _controls(key,cube):
+	if(key == ord('q') or key == ord('Q')):
 		cv2.destroyAllWindows()
 		return False
 	elif(key == ord('0')):
@@ -64,7 +98,7 @@ def controls(key,cube):
 		cube.perform_move("U")
 	elif(key== ord('U')):
 		cube.perform_move("U'")
-	elif(key == ord('D')):
+	elif(key == ord('d')):
 		cube.perform_move("D")
 	elif(key== ord('D')):
 		cube.perform_move("D'")
