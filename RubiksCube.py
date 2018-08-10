@@ -1,20 +1,5 @@
 import CubeDrawer
-
-class Color:
-	WHITE = 0
-	YELLOW = 1
-	BLUE = 2
-	GREEN = 3
-	RED = 4
-	ORANGE = 5
-
-class Face:
-	FRONT = 0
-	BACK = 1
-	UP = 2
-	DOWN = 3
-	RIGHT = 4
-	LEFT = 5
+from CubeEnums import *
 
 class Side:
 
@@ -123,19 +108,21 @@ class Cube:
 		set_function = lambda side,row,col,data: side.set_row(row,data) if row != -1 else side.set_col(col,data)
 		double_move = False
 		clockwise = True
-
+		reverse_side = None
 		if(move[0]=='R'):
 			faces = [Face.FRONT,Face.UP,Face.BACK,Face.DOWN]
 			main_face = Face.RIGHT
 			row = [-1]*4
 			col = [2]*4
 			col[2] = 0
+			reverse_side = [Face.DOWN,Face.BACK]
 		elif(move[0]=='L'):
 			faces = [Face.FRONT,Face.DOWN,Face.BACK,Face.UP]
 			main_face = Face.LEFT
 			row = [-1]*4
 			col = [0]*4
 			col[2] = 2
+			reverse_side = [Face.UP,Face.BACK]
 		elif(move[0]=="U"):
 			faces = [Face.FRONT,Face.LEFT,Face.BACK,Face.RIGHT]
 			main_face = Face.UP
@@ -151,15 +138,18 @@ class Cube:
 			main_face = Face.FRONT
 			row = [2,-1,0,-1]
 			col = [-1,0,-1,2]
+			reverse_side = [Face.UP,Face.DOWN]
 		elif(move[0]=="B"):
 			faces = [Face.UP,Face.LEFT,Face.DOWN,Face.RIGHT]
 			main_face = Face.BACK
 			row = [0,-1,2,-1]
 			col = [-1,0,-1,2]
+			reverse_side = [Face.LEFT,Face.RIGHT]
 		elif(move[0]=="M"):
 			faces = [Face.UP,Face.FRONT,Face.DOWN,Face.BACK]
 			row = [-1]*4
 			col = [1]*4
+			reverse_side = [Face.UP,Face.BACK]
 			main_face = None
 		else:
 			print("ERROR INVALID MOVE {}".format(move))
@@ -177,15 +167,28 @@ class Cube:
 				col[0] = col[2]
 				col[2] = tmp
 				clockwise = False
+			if(reverse_side):
+				if(Face.BACK in reverse_side):
+					reverse_side[0] = Face.opposite(reverse_side[0])
+				elif(Face.UP in reverse_side):
+					reverse_side = [Face.LEFT,Face.BACK]
+				else:
+					reverse_side = [Face.UP,Face.DOWN]
+
+
 			elif(move[1]=="2"):
 				double_move = True
 
 		while True:
-			if main_face:
-				self.sides[main_face].rotate(clockwise)
+			if main_face != None:
+				self.sides[main_face].rotate(clockwise)	
 			tmp = get_function(self.sides[faces[3]],row[3],col[3])
 			for i in range(4):
 				tmp2 = get_function(self.sides[faces[i]],row[i],col[i])
+				if(reverse_side and faces[i] in reverse_side):
+					tmp3 = tmp[0]
+					tmp[0] = tmp[2]
+					tmp[2] = tmp3
 				set_function(self.sides[faces[i]],row[i],col[i],tmp)
 				tmp = tmp2
 
@@ -218,4 +221,5 @@ class Cube:
 
 if __name__ == "__main__":
 	cube = Cube()
+	cube.perform_alg("F R U R' U' F'")
 	cube.show()

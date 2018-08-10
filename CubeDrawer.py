@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from RubiksCube import Color,Face
+from CubeEnums import *
 
 # Size of one side of rubiks cube 
 SIDE_SIZE = 200
@@ -56,7 +56,7 @@ def controls(key,cube):
 		cube.perform_move("F")
 	elif(key== ord('F')):
 		cube.perform_move("F'")
-	elif(key == ord('B')):
+	elif(key == ord('b')):
 		cube.perform_move("B")
 	elif(key== ord('B')):
 		cube.perform_move("B'")
@@ -128,3 +128,10 @@ def _color_sticker(image,face,position,color):
 				image[paint_x+i+1][paint_y+j+1] = (0,0,0)
 			else:
 				image[paint_x+i+1][paint_y+j+1] = COLOR_MAP[color]
+
+
+				
+if __name__ == "__main__":
+	cube = Cube()
+	cube.perform_alg("F R U R' U' F'")
+	cube.show()
